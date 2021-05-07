@@ -1,0 +1,10 @@
+out
+
+# IDE.
+.vscode
+hie.yaml
+
+# Stack.
+**/.stack-work
+stack.yaml.lock
+**/*.cabal

@@ -1,0 +1,40 @@
+name:     gsu-physfac-timetable
+version:  0.0.1
+category: API
+author:   Aliaksei Valatouski
+
+library:
+  source-dirs: src
+  exposed-modules:
+    - Gsu.Physfac.Site.Pages.Home
+    - Gsu.Physfac.Site.Parser
+  dependencies:
+    - aeson
+    - base >= 4.10
+    - bytestring
+    - conduit
+    - http-conduit
+    - pretty-simple # dev
+    - resourcet
+    - text
+    - xml-conduit
+    - xml-types
+  default-extensions:
+    - BlockArguments
+    - DeriveAnyClass
+    - DeriveGeneric
+    - DerivingStrategies
+    - OverloadedStrings
+    - RecordWildCards
+
+executables:
+  ptt:
+    source-dirs: app
+    main:        Main.hs
+    dependencies:
+      - aeson
+      - aeson-pretty
+      - base >= 4.10
+      - bytestring
+      - directory
+      - gsu-physfac-timetable
