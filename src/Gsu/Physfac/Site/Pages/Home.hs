@@ -24,7 +24,7 @@ homePage =
     html do
         head_
         body do
-            inner <- div do -- #center
+            inner <- div do
                 inner <- div do -- #body_outline
                     div_ -- #con_u_32
                     div_ -- .clr
