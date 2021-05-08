@@ -6,14 +6,19 @@ import           Data.Aeson                        (ToJSON)
 import qualified Data.Aeson                        as Json
 import qualified Data.Aeson.Encode.Pretty          as Json
 import qualified Data.ByteString.Lazy              as Lbs
+import qualified Data.Text                         as Text
+import qualified Network.HTTP.Simple               as Net
 
+import           Gsu.Physfac.Site.Pages.Download
 import           Gsu.Physfac.Site.Pages.Home
+import           Gsu.Physfac.Site.Pages.Repository
 import           Gsu.Physfac.Site.Parser
 import           Options
 
 main :: IO ()
 main = do
     Options { .. } <- parseOptions
+
     when (any isJust [optionsWeeks, optionsBellRings]) do
         let url = "https://old.gsu.by/physfac/"
         HomePage bellRings weekPairs <- fetch homePage url
@@ -24,16 +29,19 @@ main = do
         whenJust optionsBellRings \(path, saveMode) ->
             saveAsJson saveMode path bellRings
 
--- parseRepository :: IO ()
--- parseRepository = do
---     let url = "https://old.gsu.by/physfac/index.php?option=com_remository&func=select&id=313"
---     RepositoryFile file _image _name : _ <- fetch repository url
--- 
---     let url = "https://old.gsu.by" <> Text.unpack file
---     printf "Fetching from:\n%s\n\n" url
---     link <- fetch downloadLink url
---     let url = "https://old.gsu.by" <> Text.unpack link
---     printf "Found a link:\n%s\n" url
+    whenJust optionsTimetable \(_path, _saveMode) -> do
+        -- TODO: Find that link dynamicly.
+        let url = "https://old.gsu.by/physfac/index.php?option=com_remository&func=select&id=313"
+        RepositoryFile file _image _name : _ <- fetch repository url
+
+        let url = "https://old.gsu.by" <> Text.unpack file
+        link <- fetch downloadLink url
+
+        let url     = "https://old.gsu.by" <> Text.unpack link
+            request = Net.parseRequestThrow_ url
+        document <- Net.getResponseBody <$> Net.httpLBS request
+
+        pure ()
 
 saveAsJson :: ToJSON a => SaveMode -> FilePath -> a -> IO ()
 saveAsJson Save       path object = Json.encodeFile path object

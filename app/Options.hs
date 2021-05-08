@@ -18,6 +18,7 @@ data SaveMode = Save | SavePretty
 data Options = Options
     { optionsWeeks     :: !(Maybe (FilePath, SaveMode))
     , optionsBellRings :: !(Maybe (FilePath, SaveMode))
+    , optionsTimetable :: !(Maybe (FilePath, SaveMode))
     }
   deriving stock Show
 
@@ -29,7 +30,7 @@ parseOptions = do
         $ Options.info (options <**> Options.helper) about
     
     let Options { .. } = options
-    when (areFilePathsForEqual [optionsWeeks, optionsBellRings]) do
+    when (areFilePathsForEqual [optionsWeeks, optionsBellRings, optionsTimetable]) do
         hPutStrLn stderr "Filepaths cannot be equal to each other."
         exitFailure
     
@@ -46,6 +47,7 @@ options :: Options.Parser Options
 options = Options
     <$> Options.optional ( weeks     <|> prettyWeeks     )
     <*> Options.optional ( bellRings <|> prettyBellRings )
+    <*> Options.optional ( timetable <|> prettyTimetable )
 
 about :: Options.InfoMod Options
 about = mconcat
@@ -81,4 +83,18 @@ prettyBellRings = fmap (, SavePretty) $ Options.strOption $ mconcat
     [ Options.short 'B'
     , Options.metavar "FILEPATH"
     , Options.help "`-b` producing formatted output"
+    ]
+
+timetable :: Options.Parser (FilePath, SaveMode)
+timetable = fmap (, Save) $ Options.strOption $ mconcat
+    [ Options.short 't'
+    , Options.metavar "FILEPATH"
+    , Options.help "Where to place Excel timetable"
+    ]
+
+prettyTimetable :: Options.Parser (FilePath, SaveMode)
+prettyTimetable = fmap (, SavePretty) $ Options.strOption $ mconcat
+    [ Options.short 'T'
+    , Options.metavar "FILEPATH"
+    , Options.help "`-t` producing formatted output"
     ]
