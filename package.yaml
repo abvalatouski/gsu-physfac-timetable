@@ -6,7 +6,9 @@ author:   Aliaksei Valatouski
 library:
   source-dirs: src
   exposed-modules:
+    - Gsu.Physfac.Site.Pages.Download
     - Gsu.Physfac.Site.Pages.Home
+    - Gsu.Physfac.Site.Pages.Repository
     - Gsu.Physfac.Site.Parser
   dependencies:
     - aeson
@@ -38,3 +40,5 @@ executables:
       - bytestring
       - directory
       - gsu-physfac-timetable
+      - pretty-simple # dev
+      - text

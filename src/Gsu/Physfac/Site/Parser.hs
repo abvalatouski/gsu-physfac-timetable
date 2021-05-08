@@ -27,76 +27,106 @@ fetch parser url = do
      .| parser
 
 -- Useful combinators.
---
--- Convention:
--- - name  - required tag;
--- - name_ - ignored tag;
--- - name' - optional tag.
 
-tag' :: Text -> Parser inner -> Parser (Maybe inner)
-tag' = Xml.tagIgnoreAttrs . matchTagName
+optionalTagIgnoreAttrs :: Text -> Parser inner -> Parser (Maybe inner)
+optionalTagIgnoreAttrs = Xml.tagIgnoreAttrs . matchTagName
 
-tag :: Text -> Parser inner -> Parser inner
-tag name = Xml.force errorMessage . tag' name
+tagIgnoreAttrs :: Text -> Parser inner -> Parser inner
+tagIgnoreAttrs name = Xml.force errorMessage . optionalTagIgnoreAttrs name
   where
     errorMessage = "Expected <" <> Text.unpack name <> ">."
 
-tag_ :: Text -> Parser ()
-tag_ = void . flip Xml.ignoreTree Xml.ignoreAttrs . matchTagName
+tagIgnoreAttrs_ :: Text -> Parser ()
+tagIgnoreAttrs_ = void . flip Xml.ignoreTree Xml.ignoreAttrs . matchTagName
+
+optionalTag :: Text -> Xml.AttrParser attrs -> (attrs -> Parser inner) -> Parser (Maybe inner)
+optionalTag = Xml.tag' . matchTagName
+
+tag :: Text -> Xml.AttrParser attrs -> (attrs -> Parser inner) -> Parser inner
+tag name attrs = Xml.force errorMessage . optionalTag name attrs
+  where
+    errorMessage = "Expected <" <> Text.unpack name <> ">."
 
 html :: Parser inner -> Parser inner
-html = tag "html"
+html = tagIgnoreAttrs "html"
 
 head_ :: Parser ()
-head_ = tag_ "head"
+head_ = tagIgnoreAttrs_ "head"
 
 body :: Parser inner -> Parser inner
-body = tag "body"
+body = tagIgnoreAttrs "body"
 
 div_ :: Parser ()
-div_ = tag_ "div"
+div_ = tagIgnoreAttrs_ "div"
 
 div :: Parser inner -> Parser inner
-div = tag "div"
+div = tagIgnoreAttrs "div"
+
+div' :: Parser inner -> Parser (Maybe inner)
+div' = optionalTagIgnoreAttrs "div"
 
 h3_ :: Parser ()
-h3_ = tag_ "h3"
+h3_ = tagIgnoreAttrs_ "h3"
+
+h3 :: Parser inner -> Parser inner
+h3 = tagIgnoreAttrs "h3"
 
 table_ :: Parser ()
-table_ = tag_ "table"
+table_ = tagIgnoreAttrs_ "table"
 
 table :: Parser inner -> Parser inner
-table = tag "table"
+table = tagIgnoreAttrs "table"
 
 tbody :: Parser inner -> Parser inner
-tbody = tag "tbody"
+tbody = tagIgnoreAttrs "tbody"
 
 tr_ :: Parser ()
-tr_ = tag_ "tr"
+tr_ = tagIgnoreAttrs_ "tr"
 
 tr :: Parser inner -> Parser inner
-tr = tag "tr"
+tr = tagIgnoreAttrs "tr"
 
 tr' :: Parser inner -> Parser (Maybe inner)
-tr' = tag' "tr"
+tr' = optionalTagIgnoreAttrs "tr"
 
 td :: Parser inner -> Parser inner
-td = tag "td"
+td = tagIgnoreAttrs "td"
 
 td' :: Parser inner -> Parser (Maybe inner)
-td' = tag' "td"
+td' = optionalTagIgnoreAttrs "td"
 
 span :: Parser inner -> Parser inner
-span = tag "span"
+span = tagIgnoreAttrs "span"
 
 span_ :: Parser ()
-span_ = tag_ "span"
+span_ = tagIgnoreAttrs_ "span"
 
 hr_ :: Parser ()
-hr_ = tag_ "hr"
+hr_ = tagIgnoreAttrs_ "hr"
 
 strong :: Parser inner -> Parser inner
-strong = tag "strong"
+strong = tagIgnoreAttrs "strong"
+
+strong_ :: Parser ()
+strong_ = tagIgnoreAttrs_ "strong"
+
+script_ :: Parser ()
+script_ = tagIgnoreAttrs_ "script"
+
+a :: (Text -> Parser inner) -> Parser inner
+a = tag "a" $ Xml.requireAttr "href" <* Xml.ignoreAttrs
+
+img :: (Text -> Parser inner) -> Parser inner
+img = tag "img" $ Xml.requireAttr "src" <* Xml.ignoreAttrs
+
+img_ :: Parser ()
+img_ = tagIgnoreAttrs_ "img"
+
+h2 :: Parser inner -> Parser inner
+h2 = tagIgnoreAttrs "h2"
+
+dl_ :: Parser ()
+dl_ = tagIgnoreAttrs_ "dl"
 
 -- Utils.
 
