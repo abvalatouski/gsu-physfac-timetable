@@ -4,12 +4,14 @@ module Gsu.Physfac.Site.Pages.Home
 import           GHC.Generics
 import           Prelude                 hiding (div, span)
 
+import           Control.Monad.Reader
 import           Data.Aeson              (ToJSON)
 import           Data.Text               (Text)
 import qualified Data.Text               as Text
 import qualified Data.Text.Read          as Text
 import qualified Text.XML.Stream.Parse   as Xml
 
+import           Gsu.Physfac.Common
 import           Gsu.Physfac.Site.Parser
 
 data HomePage = HomePage
@@ -79,7 +81,7 @@ bellRings =
                     table do
                         tbody do
                             tr_
-                            Xml.many $ tr' bellRingQuad
+                            many $ tr' bellRingQuad
                 hr_
                 pure inner
         tr_
@@ -102,16 +104,9 @@ data BellRingPair = BellRingPair
   deriving stock    (Show, Generic)
   deriving anyclass ToJSON
 
-data HoursAndMinutes = HoursAndMinutes
-    { hours   :: !Int
-    , minutes :: !Int
-    }
-  deriving stock    (Show, Generic)
-  deriving anyclass ToJSON
-
 bellRingPair :: Parser BellRingPair
 bellRingPair = td $ div $ span $ span do
-    text <- Xml.content
+    text <- content
     let [begin, end] = map (toTime . Text.strip) $ Text.splitOn "-" text
     pure $ BellRingPair begin end
   where
@@ -151,7 +146,7 @@ weekPairs =
                             tr_
                             tr_
                             tr_
-                            Xml.many $ tr' weekPair
+                            many $ tr' weekPair
                 hr_
                 pure inner
         tr_
@@ -161,7 +156,7 @@ weekPair :: Parser WeekPair
 weekPair = WeekPair <$> week <*> week
 
 week :: Parser MonthAndDayPair
-week = td $ div $ span $ span $ toPair <$> Xml.content
+week = td $ div $ span $ span $ toPair <$> content
   where
     toPair input =
         let [from, to] = map Text.strip $ Text.splitOn "-" input

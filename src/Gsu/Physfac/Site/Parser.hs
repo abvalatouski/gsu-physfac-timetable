@@ -3,20 +3,17 @@
 module Gsu.Physfac.Site.Parser
   where
 
-import           Data.Functor
-import           Data.Void
-
+import           Control.Monad.Reader
 import           Control.Monad.Trans.Resource (ResIO, runResourceT)
-import           Data.Conduit                 (ConduitT, runConduit, (.|))
-import qualified Data.Conduit                 as Conduit
+import           Data.Conduit                 (runConduit, (.|))
 import           Data.Text                    (Text)
-import qualified Data.Text                    as Text
-import qualified Data.XML.Types               as Xml
 import qualified Network.HTTP.Simple          as Net
 import qualified Text.XML.Stream.Parse        as Xml
 
+import           Gsu.Physfac.Common
+
 -- Type wrapper for convenient usage.
-type Parser = ConduitT Xml.Event Void ResIO
+type Parser = XmlParserT ResIO
 
 fetch :: Parser a -> String -> IO a
 fetch parser url = do
@@ -24,28 +21,12 @@ fetch parser url = do
     runResourceT $ runConduit $
         Net.httpSource request Net.getResponseBody
      .| Xml.parseBytes Xml.def
-     .| parser
+     .| runReaderT parser (XmlSettings xmlNamespace xmlPrefix)
+  where
+    xmlNamespace = Just "http://www.w3.org/1999/xhtml"
+    xmlPrefix    = Nothing
 
 -- Useful combinators.
-
-optionalTagIgnoreAttrs :: Text -> Parser inner -> Parser (Maybe inner)
-optionalTagIgnoreAttrs = Xml.tagIgnoreAttrs . matchTagName
-
-tagIgnoreAttrs :: Text -> Parser inner -> Parser inner
-tagIgnoreAttrs name = Xml.force errorMessage . optionalTagIgnoreAttrs name
-  where
-    errorMessage = "Expected <" <> Text.unpack name <> ">."
-
-tagIgnoreAttrs_ :: Text -> Parser ()
-tagIgnoreAttrs_ = void . flip Xml.ignoreTree Xml.ignoreAttrs . matchTagName
-
-optionalTag :: Text -> Xml.AttrParser attrs -> (attrs -> Parser inner) -> Parser (Maybe inner)
-optionalTag = Xml.tag' . matchTagName
-
-tag :: Text -> Xml.AttrParser attrs -> (attrs -> Parser inner) -> Parser inner
-tag name attrs = Xml.force errorMessage . optionalTag name attrs
-  where
-    errorMessage = "Expected <" <> Text.unpack name <> ">."
 
 html :: Parser inner -> Parser inner
 html = tagIgnoreAttrs "html"
@@ -127,18 +108,3 @@ h2 = tagIgnoreAttrs "h2"
 
 dl_ :: Parser ()
 dl_ = tagIgnoreAttrs_ "dl"
-
--- Utils.
-
-wrapTagName :: Text -> Xml.Name
-wrapTagName name = Xml.Name name namespace prefix
-  where
-    namespace = Just "http://www.w3.org/1999/xhtml"
-    prefix    = Nothing
-
-matchTagName :: Text -> Xml.NameMatcher Xml.Name
-matchTagName = Xml.matching . (==) . wrapTagName
-
--- Not the best way to handle errors, but now that's enough.
-insertMissingEndTag :: Text -> Parser ()
-insertMissingEndTag = Conduit.leftover . Xml.EventEndElement . wrapTagName

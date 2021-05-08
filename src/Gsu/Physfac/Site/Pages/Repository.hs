@@ -6,6 +6,7 @@ import           Prelude                 hiding (div)
 import           Data.Text               (Text)
 import qualified Text.XML.Stream.Parse   as Xml
 
+import           Gsu.Physfac.Common
 import           Gsu.Physfac.Site.Parser
 
 type Repository = [RepositoryFile]
@@ -36,7 +37,7 @@ repository =
                                     div_ -- #remositorycontainer
                                     div_ -- #remositoryfilelisthead
                                     inner <- div do -- #remositoryfilelisting
-                                        Xml.many $ div' -- #remositoryfileblock
+                                        many $ div' -- #remositoryfileblock
                                             repositoryFile
                                     script_
                                     div_ -- #remositoryfooter
@@ -59,7 +60,7 @@ data RepositoryFile = RepositoryFile
 repositoryFile :: Parser RepositoryFile
 repositoryFile = do
     inner <- h3 do
-        a \href -> RepositoryFile href <$> img pure <*> Xml.content
+        a \href -> RepositoryFile href <$> img pure <*> content
     div_ -- #remositoryonethumb
     div_ -- #remositoryfilesummary
     pure inner

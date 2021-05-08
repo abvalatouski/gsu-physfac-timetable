@@ -4,9 +4,11 @@ module Gsu.Physfac.Site.Pages.Download
 import           Data.Functor
 import           Prelude                 hiding (div)
 
+import           Control.Monad.Trans
 import           Data.Text               (Text)
 import qualified Text.XML.Stream.Parse   as Xml
 
+import           Gsu.Physfac.Common
 import           Gsu.Physfac.Site.Parser
 
 type DownloadLink = Text
@@ -36,7 +38,7 @@ downloadLink =
                                     inner <- div do -- #remositoryfileinfo
                                         script_
                                         inner <- h2 do
-                                            void $ Xml.content
+                                            void content
                                             a \href -> do
                                                 img_
                                                 strong_
