@@ -6,6 +6,7 @@ author:   Aliaksei Valatouski
 library:
   source-dirs: src
   exposed-modules:
+    - Gsu.Physfac.Common
     - Gsu.Physfac.Site.Pages.Download
     - Gsu.Physfac.Site.Pages.Home
     - Gsu.Physfac.Site.Pages.Repository
@@ -15,7 +16,9 @@ library:
     - base >= 4.10
     - bytestring
     - conduit
+    - exceptions
     - http-conduit
+    - mtl
     - resourcet
     - text
     - xml-conduit
@@ -43,6 +46,7 @@ executables:
       - bytestring
       - extra
       - gsu-physfac-timetable
+      - http-conduit
       - optparse-applicative
       - text
     default-extensions:
