@@ -19,8 +19,8 @@ main = do
     unless exists $
         createDirectory "out"
     
-    -- parseHome
-    parseRepository
+    parseHome
+    -- parseRepository
 
 parseHome :: IO ()
 parseHome = do
