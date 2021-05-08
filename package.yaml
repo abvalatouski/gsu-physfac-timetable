@@ -16,7 +16,6 @@ library:
     - bytestring
     - conduit
     - http-conduit
-    - pretty-simple # dev
     - resourcet
     - text
     - xml-conduit
@@ -33,12 +32,21 @@ executables:
   ptt:
     source-dirs: app
     main:        Main.hs
+    ghc-options:
+      - -O2
+    other-modules:
+      - Options
     dependencies:
       - aeson
       - aeson-pretty
       - base >= 4.10
       - bytestring
-      - directory
+      - extra
       - gsu-physfac-timetable
-      - pretty-simple # dev
+      - optparse-applicative
       - text
+    default-extensions:
+      - BlockArguments
+      - DerivingStrategies
+      - RecordWildCards
+      - TupleSections
