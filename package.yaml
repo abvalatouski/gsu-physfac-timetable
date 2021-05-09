@@ -11,23 +11,31 @@ library:
     - Gsu.Physfac.Site.Pages.Home
     - Gsu.Physfac.Site.Pages.Repository
     - Gsu.Physfac.Site.Parser
+    - Gsu.Physfac.Timetable.Document.ShrinkToFit
+    - Gsu.Physfac.Timetable.Document.Xlsx
+    - Gsu.Physfac.Timetable.Document.Xlsx.Parser
   dependencies:
     - aeson
     - base >= 4.10
     - bytestring
     - conduit
+    - deepseq
     - exceptions
     - http-conduit
     - mtl
     - resourcet
     - text
+    - vector
     - xml-conduit
     - xml-types
+    - zip-archive
   default-extensions:
     - BlockArguments
     - DeriveAnyClass
     - DeriveGeneric
     - DerivingStrategies
+    - GeneralizedNewtypeDeriving
+    - LambdaCase
     - OverloadedStrings
     - RecordWildCards
 

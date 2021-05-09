@@ -1,18 +1,19 @@
 import           Control.Monad
 import           Data.Maybe
 
-import           Control.Monad.Extra               (whenJust)
-import           Data.Aeson                        (ToJSON)
-import qualified Data.Aeson                        as Json
-import qualified Data.Aeson.Encode.Pretty          as Json
-import qualified Data.ByteString.Lazy              as Lbs
-import qualified Data.Text                         as Text
-import qualified Network.HTTP.Simple               as Net
+import           Control.Monad.Extra                        (whenJust)
+import           Data.Aeson                                 (ToJSON)
+import qualified Data.Aeson                                 as Json
+import qualified Data.Aeson.Encode.Pretty                   as Json
+import qualified Data.ByteString.Lazy                       as Lbs
+import qualified Data.Text                                  as Text
+import qualified Network.HTTP.Simple                        as Net
 
 import           Gsu.Physfac.Site.Pages.Download
 import           Gsu.Physfac.Site.Pages.Home
 import           Gsu.Physfac.Site.Pages.Repository
 import           Gsu.Physfac.Site.Parser
+import           Gsu.Physfac.Timetable.Document.ShrinkToFit
 import           Options
 
 main :: IO ()
@@ -30,16 +31,20 @@ main = do
             saveAsJson saveMode path bellRings
 
     whenJust optionsTimetable \(_path, _saveMode) -> do
-        -- TODO: Find that link dynamicly.
-        let url = "https://old.gsu.by/physfac/index.php?option=com_remository&func=select&id=313"
-        RepositoryFile file _image _name : _ <- fetch repository url
+        -- -- TODO: Find that link dynamicly.
+        -- let url = "https://old.gsu.by/physfac/index.php?option=com_remository&func=select&id=313"
+        -- RepositoryFile file _image _name : _ <- fetch repository url
+        -- print file
 
-        let url = "https://old.gsu.by" <> Text.unpack file
-        link <- fetch downloadLink url
+        -- let url = "https://old.gsu.by" <> Text.unpack file
+        -- link <- fetch downloadLink url
+        -- print link
 
-        let url     = "https://old.gsu.by" <> Text.unpack link
-            request = Net.parseRequestThrow_ url
-        document <- Net.getResponseBody <$> Net.httpLBS request
+        -- let url     = "https://old.gsu.by" <> Text.unpack link
+        --    request = Net.parseRequestThrow_ url
+        -- print url
+        let request = Net.parseRequestThrow_ "http://old.gsu.by/physfac/index.php/2010-02-04-14-13-48/2010-02-04-14-14-34.html?func=download&id=1286&chk=abe0dda22c0e29cd13ffc3ede0ca168d&no_html=1"
+        table <- parseTable . Net.getResponseBody =<< Net.httpLBS request
 
         pure ()
 

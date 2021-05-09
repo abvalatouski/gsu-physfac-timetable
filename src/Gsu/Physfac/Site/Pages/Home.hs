@@ -4,12 +4,10 @@ module Gsu.Physfac.Site.Pages.Home
 import           GHC.Generics
 import           Prelude                 hiding (div, span)
 
-import           Control.Monad.Reader
 import           Data.Aeson              (ToJSON)
 import           Data.Text               (Text)
 import qualified Data.Text               as Text
 import qualified Data.Text.Read          as Text
-import qualified Text.XML.Stream.Parse   as Xml
 
 import           Gsu.Physfac.Common
 import           Gsu.Physfac.Site.Parser
@@ -165,10 +163,3 @@ week = td $ div $ span $ span $ toPair <$> content
     toDate input =
         let [day, month] = map toInt $ Text.splitOn "." input
          in MonthAndDay month day
-
--- Utils.
-
-toInt :: Text -> Int
-toInt input =
-    let Right (result, "") = Text.decimal input
-     in result

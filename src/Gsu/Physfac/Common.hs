@@ -2,6 +2,7 @@
 module Gsu.Physfac.Common
   where
 
+import           Data.Functor
 import           Data.Void
 import           GHC.Generics
 
@@ -12,11 +13,18 @@ import           Data.Conduit          (ConduitT)
 import qualified Data.Conduit          as Conduit
 import           Data.Text             (Text)
 import qualified Data.Text             as Text
+import qualified Data.Text.Read        as Text
 import qualified Data.XML.Types        as Xml
 import qualified Text.XML.Stream.Parse as Xml
 
+toInt :: Text -> Int
+toInt input =
+    let Right (result, "") = Text.decimal input
+     in result
+
 -- Parsing XML.
 
+-- TODO: Consider flipping transformers.
 type XmlParserT m = ReaderT XmlSettings (ConduitT Xml.Event Void m)
 
 data XmlSettings = XmlSettings
@@ -28,6 +36,11 @@ content ::
     MonadThrow m
  => XmlParserT m Text
 content = lift Xml.content
+
+content_ ::
+    MonadThrow m
+ => XmlParserT m ()
+content_ = void content
 
 optionalTagIgnoreAttrs ::
     MonadThrow m
@@ -77,7 +90,18 @@ many ::
 many item = do
     xmlSettings <- ask
     -- TODO: Try to refactor that ugly mess with `ReaderT`.
-    lift $ Xml.many $ runReaderT item xmlSettings
+    lift $ Xml.many $
+        runReaderT item xmlSettings
+
+or ::
+    MonadThrow m
+ => XmlParserT m (Maybe a) -> XmlParserT m (Maybe a) -> XmlParserT m (Maybe a)
+this `or` that = do
+    xmlSettings <- ask
+    -- TODO: Try to refactor that ugly mess with `ReaderT`.
+    lift $ Xml.orE
+        (runReaderT this xmlSettings)
+        (runReaderT that xmlSettings)
 
 wrapTagName :: XmlSettings -> Text -> Xml.Name
 wrapTagName (XmlSettings namespace prefix) name = Xml.Name name namespace prefix

@@ -4,7 +4,6 @@ module Gsu.Physfac.Site.Pages.Repository
 import           Prelude                 hiding (div)
 
 import           Data.Text               (Text)
-import qualified Text.XML.Stream.Parse   as Xml
 
 import           Gsu.Physfac.Common
 import           Gsu.Physfac.Site.Parser
